@@ -70,3 +70,13 @@ logs/
 
 # Cache
 cache/
+# Organisation patterns
+logs/*.log
+Thumbs.db
+# IDE files
+# Cache directories
+.coverage
+htmlcov/
+# Temporary files
+tmp/
+*.temp
