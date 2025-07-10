@@ -1,186 +1,193 @@
-# 🏠 MCP Real Estate - Serveur MCP pour Claude Desktop
+# 🏠 MCP Real Estate - Serveur MCP pour l'Immobilier Français
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
 
-Serveur MCP (Model Context Protocol) pour l'agrégation et l'analyse d'annonces immobilières françaises, compatible avec Claude Desktop.
+Serveur MCP (Model Context Protocol) pour l'analyse et la recherche d'opportunités immobilières françaises, compatible avec Claude Desktop et Windsurf.
 
-## 🚀 Installation Rapide
+## 🚀 Installation
 
 ### Prérequis
+
 - Python 3.8 ou supérieur
 - Git
 
-### Installation Automatique
+### Installation Manuelle
 
 ```bash
 # 1. Cloner le repository
 git clone https://github.com/votre-username/real-estate-mcp.git
 cd real-estate-mcp
 
-# 2. Lancer l'installation automatique
-python install.py
-```
-
-L'installation automatique va :
-- ✅ Créer l'environnement virtuel
-- ✅ Installer toutes les dépendances
-- ✅ Générer la configuration pour Claude Desktop
-- ✅ Créer les scripts de démarrage
-- ✅ Tester l'installation
-
-## 🤖 Configuration Claude Desktop
-
-### ⚡ Environnement Virtuel Automatique
-
-Ce projet utilise un **wrapper intelligent** qui garantit que l'environnement virtuel est **actif 100% du temps** pour Claude Desktop.
-
-### Configuration Automatique
-
-Après l'installation, copiez le contenu de `claude_desktop_config.json` dans votre configuration Claude Desktop :
-
-### Windows
-Fichier de configuration : `%APPDATA%\Claude\claude_desktop_config.json`
-
-### macOS
-Fichier de configuration : `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-### Linux
-Fichier de configuration : `~/.config/Claude/claude_desktop_config.json`
-
-Exemple de configuration générée :
-```json
-{
-  "mcpServers": {
-    "real-estate-mcp": {
-      "command": "/chemin/vers/votre/projet/venv/Scripts/python.exe",
-      "args": ["/chemin/vers/votre/projet/mcp_wrapper.py"],
-      "cwd": "/chemin/vers/votre/projet",
-      "env": {
-        "PYTHONPATH": "/chemin/vers/votre/projet/src",
-        "VIRTUAL_ENV": "/chemin/vers/votre/projet/venv"
-      }
-    }
-  }
-}
-```
-
-### 🔧 Fonctionnement du Wrapper
-
-- ✅ **Détection automatique** de l'environnement virtuel
-- ✅ **Activation forcée** si nécessaire
-- ✅ **Vérification des dépendances**
-- ✅ **Gestion d'erreurs robuste**
-
-**Résultat** : L'environnement virtuel est actif en permanence, sans intervention manuelle !
-
-## 🛠️ Fonctionnalités
-
-### 7 Outils MCP Disponibles
-
-1. **🔍 search_properties** - Recherche de biens immobiliers
-2. **📊 analyze_market** - Analyse de marché par zone
-3. **🏘️ get_neighborhood_info** - Informations détaillées sur un quartier
-4. **⚖️ compare_locations** - Comparaison de plusieurs zones
-5. **📋 get_property_summary** - Résumé du marché immobilier
-6. **💰 analyze_investment_opportunity** - Analyse d'opportunités d'investissement
-7. **📈 compare_investment_strategies** - Comparaison de stratégies d'investissement
-
-### Sources de Données
-- **LeBonCoin API** - Annonces en temps réel
-- **API DVF** - Données de valeurs foncières officielles
-- **API INSEE** - Statistiques démographiques
-- **API Adresse française** - Géocodage et normalisation
-
-## 📖 Exemples d'Utilisation
-
-### Recherche de Studios à Antibes
-```
-Trouve-moi des studios de plus de 30m² à louer à Antibes
-```
-
-### Analyse de Marché
-```
-Analyse le marché immobilier locatif à Lyon
-```
-
-### Comparaison d'Investissement
-```
-Compare les stratégies d'investissement locatif vs marchand de biens pour un appartement 3 pièces à 250 000€ à Marseille
-```
-
-## 🔧 Installation Manuelle
-
-Si l'installation automatique échoue :
-
-```bash
-# 1. Créer l'environnement virtuel
+# 2. Créer l'environnement virtuel
 python -m venv venv
 
-# 2. Activer l'environnement virtuel
+# 3. Activer l'environnement virtuel
 # Windows:
 venv\Scripts\activate
 # Unix/Mac:
 source venv/bin/activate
 
-# 3. Installer les dépendances
+# 4. Installer les dépendances
 pip install -r requirements.txt
+```
 
-# 4. Tester l'installation
+## 🤖 Configuration MCP
+
+### Pour Claude Desktop
+
+Ajoutez cette configuration à votre fichier `claude_desktop_config.json` :
+
+**Windows** : `%APPDATA%\Claude\claude_desktop_config.json`
+**macOS** : `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Linux** : `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "real-estate-mcp": {
+      "command": "C:\\chemin\\vers\\votre\\projet\\venv\\Scripts\\python.exe",
+      "args": ["C:\\chemin\\vers\\votre\\projet\\mcp_real_estate_server.py"],
+      "cwd": "C:\\chemin\\vers\\votre\\projet"
+    }
+  }
+}
+```
+
+### Pour Windsurf
+
+Le serveur est directement compatible avec Windsurf via le système MCP intégré.
+
+### Test de l'Installation
+
+```bash
+# Tester le serveur MCP
+python mcp_real_estate_server.py
+
+# Ou utiliser le script de démarrage
 python start_server.py
 ```
 
-## 🧪 Tests
+## 🛠️ Fonctionnalités
+
+### 7 Outils MCP Disponibles
+
+1. **🔍 search_properties** - Recherche de biens immobiliers avec filtres avancés
+2. **📊 analyze_market** - Analyse complète du marché par zone géographique
+3. **🏘️ get_neighborhood_info** - Informations détaillées sur un quartier (transports, commodités)
+4. **⚖️ compare_locations** - Comparaison multi-critères de plusieurs zones
+5. **📋 get_property_summary** - Résumé synthétique du marché immobilier
+6. **💰 analyze_investment_opportunity** - Analyse d'opportunités d'investissement locatif/marchand de biens
+7. **📈 compare_investment_strategies** - Comparaison de stratégies d'investissement
+
+### Sources de Données
+
+- **APIs Immobilières** - Données d'annonces en temps réel
+- **Données Géographiques** - Géocodage et informations de localisation
+- **Analyses de Marché** - Statistiques et tendances immobilières
+- **Calculs d'Investissement** - Rentabilité locative et plus-values potentielles
+
+## 📖 Exemples d'Utilisation
+
+### Recherche de Studios à Antibes
+
+```text
+Trouve-moi des studios de plus de 30m² à louer à Antibes
+```
+
+### Analyse de Marché
+
+```text
+Analyse le marché immobilier locatif à Lyon
+```
+
+### Comparaison d'Investissement
+
+```text
+Compare les stratégies d'investissement locatif vs marchand de biens pour un appartement 3 pièces à 250 000€ à Marseille
+```
+
+## 🧪 Tests et Validation
 
 ```bash
 # Activer l'environnement virtuel
 venv\Scripts\activate  # Windows
 source venv/bin/activate  # Unix/Mac
 
-# Tester la recherche Antibes
-python scripts/test_antibes_search.py
+# Tester le serveur MCP
+python mcp_real_estate_server.py
 
-# Valider l'organisation
-python scripts/validate_organization.py
+# Tester avec le script de démarrage
+python start_server.py
 ```
+
+## 🔧 Développement
+
+### Structure des Modules
+
+- **`mcp_real_estate_server.py`** - Serveur MCP principal
+- **`src/main.py`** - Logique métier et analyses
+- **`src/mcp_server.py`** - Interface MCP
+- **`src/dynamic_data_service.py`** - Service de données dynamiques
+- **`src/rental_analyzer.py`** - Analyseur d'investissement locatif
+- **`src/dealer_analyzer.py`** - Analyseur marchand de biens
 
 ## 📁 Structure du Projet
 
-```
+```text
 real-estate-mcp/
-├── 📂 src/                      # Code source principal
-│   ├── 🐍 mcp_server.py         # Serveur MCP
-│   ├── 🐍 main.py               # Logique métier
-│   └── 📂 utils/                # Utilitaires
-├── 📂 config/                   # Configuration
-├── 📂 scripts/                  # Scripts utilitaires
-├── 📂 docs/                     # Documentation
-├── 🐍 install.py                # Installation automatique
-├── 🐍 start_server.py           # Point d'entrée
-└── 📄 requirements.txt          # Dépendances
+├── 📂 src/                           # Code source principal
+│   ├── 🐍 main.py                    # Logique métier et analyses
+│   ├── 🐍 mcp_server.py              # Interface MCP
+│   ├── 🐍 dynamic_data_service.py    # Service de données
+│   ├── 🐍 rental_analyzer.py         # Analyse investissement locatif
+│   ├── 🐍 dealer_analyzer.py         # Analyse marchand de biens
+│   └── 🐍 __init__.py               # Module Python
+├── 📂 config/                        # Configuration
+├── 📂 data/                          # Données locales
+├── 🐍 mcp_real_estate_server.py      # Serveur MCP principal
+├── 🐍 start_server.py               # Script de démarrage
+├── 📄 requirements.txt              # Dépendances Python
+├── 📄 .env                          # Variables d'environnement
+└── 📄 README.md                     # Documentation
 ```
 
 ## 🐛 Dépannage
 
-### Problème d'Import
+### Problème d'Import ou de Modules
 ```bash
 # Vérifier l'environnement virtuel
 python -c "import sys; print(sys.executable)"
 
 # Réinstaller les dépendances
 pip install -r requirements.txt --force-reinstall
+
+# Vérifier les imports
+python -c "from src.main import DynamicRealEstateMCP; print('Import OK')"
 ```
 
-### Problème de Permissions (Unix/Mac)
+### Problème de Configuration MCP
+
+1. Vérifiez que les chemins dans la configuration sont corrects (utilisez des chemins absolus)
+2. Redémarrez Claude Desktop ou Windsurf après modification
+3. Vérifiez les logs du serveur MCP (`mcp_server.log`)
+
+### Problème d'Encodage (Windows)
+
 ```bash
-chmod +x start_mcp.sh
+# Le serveur gère automatiquement l'encodage UTF-8
+# Vérifiez les logs pour les erreurs d'encodage
+type mcp_server.log
 ```
 
-### Problème Claude Desktop
-1. Vérifiez que les chemins dans `claude_desktop_config.json` sont corrects
-2. Redémarrez Claude Desktop après modification
-3. Vérifiez les logs de Claude Desktop
+### Test de Connectivité
+
+```bash
+# Tester la communication MCP
+python mcp_real_estate_server.py
+# Le serveur doit démarrer sans erreur
+```
 
 ## 🤝 Contribution
 
@@ -196,16 +203,16 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🆘 Support
 
-- 📖 [Documentation complète](docs/)
-- 🐛 [Signaler un bug](https://github.com/votre-username/real-estate-mcp/issues)
-- 💡 [Demander une fonctionnalité](https://github.com/votre-username/real-estate-mcp/issues)
+- 🐛 Signaler un bug via les issues GitHub
+- 💡 Demander une fonctionnalité via les issues GitHub
+- 📧 Contact direct pour le support technique
 
 ## ⭐ Remerciements
 
 - [Model Context Protocol](https://modelcontextprotocol.io/) pour le standard MCP
-- [Claude Desktop](https://claude.ai/) pour l'intégration IA
-- APIs officielles françaises pour les données immobilières
+- [Claude Desktop](https://claude.ai/) et [Windsurf](https://codeium.com/windsurf) pour l'intégration IA
+- Communauté open source pour les outils et bibliothèques utilisés
 
 ---
 
-**Prêt à analyser le marché immobilier français avec Claude ! 🏠✨**
+## Prêt à analyser le marché immobilier français avec l'IA ! 🏠✨
