@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "specialized-real-estate": {
+      "command": "python",
+      "args": [
+        "specialized_mcp_server.py"
+      ],
+      "cwd": "c:\\Users\\kcoutellier\\Documents\\MCP\\real-estate-MCP",
+      "env": {
+        "PYTHONPATH": "c:\\Users\\kcoutellier\\Documents\\MCP\\real-estate-MCP\\src"
+      }
+    }
+  }
+}

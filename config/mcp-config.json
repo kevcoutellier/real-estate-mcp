@@ -1,0 +1,38 @@
+{
+    "name": "real-estate-mcp",
+    "version": "1.0.0",
+    "description": "MCP pour agréger les annonces immobilières françaises",
+    "author": "Your Name",
+    "license": "MIT",
+    "main": "start_server.py",
+    "tools": [
+      {
+        "name": "search_properties",
+        "description": "Recherche des biens immobiliers selon différents critères"
+      },
+      {
+        "name": "get_property_summary",
+        "description": "Génère un résumé du marché immobilier pour une zone"
+      }
+    ],
+    "sources": [
+      {
+        "name": "LeBonCoin",
+        "url": "https://www.leboncoin.fr",
+        "type": "api",
+        "status": "active"
+      },
+      {
+        "name": "SeLoger",
+        "url": "https://www.seloger.com",
+        "type": "scraping",
+        "status": "planned"
+      },
+      {
+        "name": "PAP",
+        "url": "https://www.pap.fr",
+        "type": "scraping",
+        "status": "planned"
+      }
+    ]
+  }

@@ -1,0 +1,27 @@
+🔄 INSTRUCTIONS DE REDÉMARRAGE WINDSURF
+
+Pour que les modifications prennent effet, vous devez :
+
+1. 📝 SAUVEGARDER tous vos fichiers ouverts
+2. 🔄 FERMER complètement Windsurf
+3. ⏳ ATTENDRE 10 secondes
+4. 🚀 RELANCER Windsurf
+5. 🔌 RECONNECTER le serveur MCP (si nécessaire)
+
+Après redémarrage, testez une recherche :
+- Si vous obtenez une ERREUR → ✅ Correct (pas de données de démo)
+- Si vous obtenez des données "Demo" → ❌ Redémarrage nécessaire
+
+Le MCP ne doit plus JAMAIS retourner de données de démonstration !
+
+🎯 RÉSUMÉ DES MODIFICATIONS EFFECTUÉES :
+- ❌ Supprimé toutes les méthodes de génération de données de test
+- ❌ Supprimé la classe SeLogerScraper (données de test uniquement)
+- ✅ Remplacé EnrichedRealEstateMCP par DynamicRealEstateMCP
+- ✅ Ajouté des messages d'erreur explicites
+- ✅ Configuration pour données temps réel uniquement
+
+🔧 COMPORTEMENT ATTENDU APRÈS REDÉMARRAGE :
+- Recherche avec service dynamique → Données réelles
+- Recherche sans service dynamique → Erreur explicite
+- Plus JAMAIS de données "Demo" ou "Test"

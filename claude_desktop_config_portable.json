@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "real-estate-mcp": {
+      "command": "python",
+      "args": [
+        "mcp_wrapper.py"
+      ],
+      "cwd": "/path/to/real-estate-MCP",
+      "env": {
+        "PYTHONPATH": "/path/to/real-estate-MCP/src"
+      }
+    }
+  }
+}

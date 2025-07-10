@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "source": "Données officielles 2024",
+    "sources": [
+      "Observatoire des loyers de l'agglomération parisienne (OLAP)",
+      "Observatoire des loyers Lyon",
+      "INSEE - Statistiques logement",
+      "API Adresse française",
+      "Données marché immobilier 2024"
+    ],
+    "last_updated": "2024-07-10",
+    "version": "1.0"
+  },
+  "rental_market_data": {
+    "paris": {
+      "global": {
+        "avg_rent_sqm": 25.5,
+        "median_rent_sqm": 24.8,
+        "range_min": 18.0,
+        "range_max": 42.0,
+        "vacancy_rate": 2.1,
+        "demand_level": "Très forte",
+        "market_trend": "Hausse modérée (+2.9%)"
+      },
+      "arrondissements": {
+        "1er": {"avg_rent_sqm": 32.0, "vacancy_rate": 2.5, "tenant_profile": "Cadres supérieurs"},
+        "2e": {"avg_rent_sqm": 30.5, "vacancy_rate": 2.3, "tenant_profile": "Jeunes actifs, couples"},
+        "3e": {"avg_rent_sqm": 29.0, "vacancy_rate": 1.8, "tenant_profile": "Jeunes actifs, artistes"},
+        "4e": {"avg_rent_sqm": 31.5, "vacancy_rate": 2.2, "tenant_profile": "Cadres, couples"},
+        "5e": {"avg_rent_sqm": 28.5, "vacancy_rate": 2.4, "tenant_profile": "Étudiants, jeunes actifs"},
+        "6e": {"avg_rent_sqm": 33.0, "vacancy_rate": 3.1, "tenant_profile": "Cadres supérieurs"},
+        "7e": {"avg_rent_sqm": 34.5, "vacancy_rate": 3.5, "tenant_profile": "Cadres supérieurs, familles aisées"},
+        "8e": {"avg_rent_sqm": 35.0, "vacancy_rate": 4.0, "tenant_profile": "Cadres supérieurs, dirigeants"},
+        "9e": {"avg_rent_sqm": 27.5, "vacancy_rate": 2.6, "tenant_profile": "Jeunes actifs, couples"},
+        "10e": {"avg_rent_sqm": 26.0, "vacancy_rate": 2.0, "tenant_profile": "Jeunes actifs, étudiants"},
+        "11e": {"avg_rent_sqm": 25.0, "vacancy_rate": 1.9, "tenant_profile": "Jeunes actifs, couples"},
+        "12e": {"avg_rent_sqm": 24.5, "vacancy_rate": 2.3, "tenant_profile": "Familles, jeunes actifs"},
+        "13e": {"avg_rent_sqm": 23.0, "vacancy_rate": 2.8, "tenant_profile": "Étudiants, jeunes actifs"},
+        "14e": {"avg_rent_sqm": 24.0, "vacancy_rate": 2.5, "tenant_profile": "Familles, jeunes actifs"},
+        "15e": {"avg_rent_sqm": 25.5, "vacancy_rate": 2.4, "tenant_profile": "Familles, cadres"},
+        "16e": {"avg_rent_sqm": 30.0, "vacancy_rate": 3.8, "tenant_profile": "Cadres supérieurs, familles aisées"},
+        "17e": {"avg_rent_sqm": 26.5, "vacancy_rate": 2.7, "tenant_profile": "Jeunes actifs, familles"},
+        "18e": {"avg_rent_sqm": 22.5, "vacancy_rate": 2.1, "tenant_profile": "Jeunes actifs, artistes"},
+        "19e": {"avg_rent_sqm": 21.0, "vacancy_rate": 2.2, "tenant_profile": "Jeunes actifs, familles"},
+        "20e": {"avg_rent_sqm": 22.0, "vacancy_rate": 2.0, "tenant_profile": "Jeunes actifs, familles"}
+      }
+    },
+    "lyon": {
+      "global": {
+        "avg_rent_sqm": 12.3,
+        "median_rent_sqm": 12.0,
+        "range_min": 9.7,
+        "range_max": 14.3,
+        "vacancy_rate": 3.2,
+        "demand_level": "Forte",
+        "market_trend": "Stable (+1.8%)"
+      },
+      "arrondissements": {
+        "1er": {"avg_rent_sqm": 15.5, "vacancy_rate": 2.8, "tenant_profile": "Cadres, jeunes actifs"},
+        "2e": {"avg_rent_sqm": 16.0, "vacancy_rate": 2.5, "tenant_profile": "Cadres, couples"},
+        "3e": {"avg_rent_sqm": 13.5, "vacancy_rate": 3.0, "tenant_profile": "Jeunes actifs, étudiants"},
+        "4e": {"avg_rent_sqm": 14.0, "vacancy_rate": 2.9, "tenant_profile": "Familles, jeunes actifs"},
+        "5e": {"avg_rent_sqm": 13.0, "vacancy_rate": 3.1, "tenant_profile": "Familles, jeunes actifs"},
+        "6e": {"avg_rent_sqm": 17.5, "vacancy_rate": 3.5, "tenant_profile": "Cadres supérieurs, familles aisées"},
+        "7e": {"avg_rent_sqm": 12.0, "vacancy_rate": 3.3, "tenant_profile": "Étudiants, jeunes actifs"},
+        "8e": {"avg_rent_sqm": 11.5, "vacancy_rate": 3.4, "tenant_profile": "Familles, jeunes actifs"},
+        "9e": {"avg_rent_sqm": 10.5, "vacancy_rate": 3.6, "tenant_profile": "Familles, jeunes actifs"},
+        "villeurbanne": {"avg_rent_sqm": 11.8, "vacancy_rate": 2.8, "tenant_profile": "Étudiants, jeunes actifs"}
+      }
+    },
+    "marseille": {
+      "global": {
+        "avg_rent_sqm": 13.5,
+        "median_rent_sqm": 13.0,
+        "range_min": 11.0,
+        "range_max": 16.0,
+        "vacancy_rate": 4.2,
+        "demand_level": "Moyenne",
+        "market_trend": "Légère hausse (+2.1%)"
+      },
+      "arrondissements": {
+        "1er": {"avg_rent_sqm": 16.0, "vacancy_rate": 3.5, "tenant_profile": "Jeunes actifs, cadres"},
+        "2e": {"avg_rent_sqm": 15.5, "vacancy_rate": 3.8, "tenant_profile": "Jeunes actifs, couples"},
+        "6e": {"avg_rent_sqm": 17.0, "vacancy_rate": 4.0, "tenant_profile": "Cadres, familles aisées"},
+        "8e": {"avg_rent_sqm": 18.5, "vacancy_rate": 4.5, "tenant_profile": "Cadres supérieurs, familles aisées"}
+      }
+    }
+  },
+  "renovation_costs_2024": {
+    "methodology": "Prix moyens TTC incluant main d'œuvre et matériaux, région parisienne",
+    "costs": {
+      "rafraichissement": {
+        "cost_per_sqm": 250,
+        "duration_weeks": 2,
+        "description": "Peinture, petites réparations, nettoyage approfondi",
+        "includes": ["Peinture murs et plafonds", "Réparations mineures", "Nettoyage professionnel"]
+      },
+      "renovation_legere": {
+        "cost_per_sqm": 450,
+        "duration_weeks": 4,
+        "description": "Sols, électricité de base, plomberie simple",
+        "includes": ["Changement revêtements sols", "Mise aux normes électriques", "Plomberie courante"]
+      },
+      "renovation_partielle": {
+        "cost_per_sqm": 800,
+        "duration_weeks": 6,
+        "description": "Rénovation cuisine ou salle de bain, cloisons",
+        "includes": ["Rénovation cuisine OU salle de bain", "Cloisons", "Isolation partielle"]
+      },
+      "renovation_complete": {
+        "cost_per_sqm": 1200,
+        "duration_weeks": 10,
+        "description": "Rénovation complète hors gros œuvre",
+        "includes": ["Cuisine et salle de bain", "Électricité et plomberie complètes", "Isolation", "Sols et cloisons"]
+      },
+      "renovation_lourde": {
+        "cost_per_sqm": 1800,
+        "duration_weeks": 16,
+        "description": "Rénovation lourde avec gros œuvre",
+        "includes": ["Modification structure", "Rénovation complète", "Mise aux normes totale"]
+      },
+      "rehabilitation_complete": {
+        "cost_per_sqm": 2500,
+        "duration_weeks": 24,
+        "description": "Réhabilitation complète, remise à neuf",
+        "includes": ["Gros œuvre", "Tous corps d'état", "Mise aux normes complète", "Aménagements sur mesure"]
+      }
+    },
+    "additional_costs": {
+      "architecte": {
+        "percentage": 8,
+        "min_cost": 2000,
+        "required_above_sqm": 150,
+        "description": "Obligatoire pour surfaces > 150m² ou modifications structurelles"
+      },
+      "permis_construire": {
+        "cost": 1500,
+        "required_for": ["renovation_lourde", "rehabilitation_complete"],
+        "description": "Nécessaire pour gros œuvre et modifications façade"
+      },
+      "assurance_dommage_ouvrage": {
+        "percentage": 2.5,
+        "min_cost": 3000,
+        "description": "Obligatoire pour tous travaux de construction"
+      },
+      "frais_divers": {
+        "percentage": 5,
+        "description": "Imprévus, déménagement, stockage temporaire"
+      },
+      "tva": {
+        "standard_rate": 20,
+        "reduced_rate": 5.5,
+        "conditions": "Taux réduit pour logements > 2 ans et rénovation énergétique"
+      }
+    }
+  },
+  "investment_analysis": {
+    "rental_yields": {
+      "paris": {"gross_yield_range": [2.5, 4.0], "net_yield_range": [1.8, 3.2]},
+      "lyon": {"gross_yield_range": [3.5, 5.5], "net_yield_range": [2.8, 4.5]},
+      "marseille": {"gross_yield_range": [4.0, 6.0], "net_yield_range": [3.2, 5.0]},
+      "toulouse": {"gross_yield_range": [3.8, 5.8], "net_yield_range": [3.0, 4.8]},
+      "bordeaux": {"gross_yield_range": [3.5, 5.5], "net_yield_range": [2.8, 4.5]},
+      "nice": {"gross_yield_range": [3.0, 4.5], "net_yield_range": [2.3, 3.8]}
+    },
+    "property_dealer_margins": {
+      "paris": {"target_margin": 15, "min_margin": 10, "market_liquidity": "Forte"},
+      "lyon": {"target_margin": 20, "min_margin": 15, "market_liquidity": "Bonne"},
+      "marseille": {"target_margin": 25, "min_margin": 18, "market_liquidity": "Moyenne"},
+      "other_cities": {"target_margin": 22, "min_margin": 16, "market_liquidity": "Variable"}
+    }
+  },
+  "market_indicators": {
+    "transaction_volumes": {
+      "paris": {"annual_transactions": 85000, "trend": "Stable"},
+      "lyon": {"annual_transactions": 28000, "trend": "Hausse"},
+      "marseille": {"annual_transactions": 22000, "trend": "Stable"}
+    },
+    "price_evolution": {
+      "paris": {"annual_change": 2.9, "5_year_trend": "Hausse modérée"},
+      "lyon": {"annual_change": 1.8, "5_year_trend": "Hausse soutenue"},
+      "marseille": {"annual_change": 2.1, "5_year_trend": "Hausse modérée"}
+    }
+  }
+}

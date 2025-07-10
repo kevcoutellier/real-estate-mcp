@@ -1,0 +1,3 @@
+Requirement already satisfied: beautifulsoup4 in c:\users\kcoutellier\documents\real-estate-mcp\venv\lib\site-packages (4.13.4)
+Requirement already satisfied: soupsieve>1.2 in c:\users\kcoutellier\documents\real-estate-mcp\venv\lib\site-packages (from beautifulsoup4) (2.7)
+Requirement already satisfied: typing-extensions>=4.0.0 in c:\users\kcoutellier\documents\real-estate-mcp\venv\lib\site-packages (from beautifulsoup4) (4.14.1)
