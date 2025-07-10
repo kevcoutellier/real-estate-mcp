@@ -1141,7 +1141,16 @@ class RealEstateMCP:
 # Import des analyseurs spécialisés
 from enum import Enum
 from dataclasses import dataclass, asdict
-from .dynamic_data_service import get_dynamic_service, MarketData
+
+# Import du service dynamique
+try:
+    from .dynamic_data_service import get_dynamic_service, MarketData
+except ImportError:
+    # Import relatif pour exécution directe
+    import sys
+    import os
+    sys.path.append(os.path.dirname(__file__))
+    from dynamic_data_service import get_dynamic_service, MarketData
 
 class InvestmentProfile(Enum):
     """Profils d'investissement"""
@@ -1464,10 +1473,18 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
         # Service de données dynamiques
         self.dynamic_service = None
         
-    async def _ensure_dynamic_service(self):
+    def _ensure_dynamic_service(self):
         """S'assure que le service dynamique est initialisé"""
         if self.dynamic_service is None:
-            self.dynamic_service = await get_dynamic_service()
+            try:
+                self.dynamic_service = get_dynamic_service()
+                logger.info("Service dynamique initialisé avec succès")
+            except Exception as e:
+                logger.error(f"Erreur lors de l'initialisation du service dynamique: {e}")
+                # Fallback : créer une instance directement
+                from dynamic_data_service import DynamicDataService
+                self.dynamic_service = DynamicDataService()
+                logger.info("Service dynamique initialisé en fallback")
     
     async def get_market_data_dynamic(self, location: str, transaction_type: str = 'rent') -> Dict[str, Any]:
         """Récupère les données de marché en temps réel"""
