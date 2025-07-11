@@ -51,7 +51,7 @@ class MCPRealEstateServer:
         if HAS_MAIN_MODULE:
             try:
                 self.mcp = DynamicRealEstateMCP()
-                await self.mcp._ensure_dynamic_service_initialized()
+                await self.mcp._ensure_dynamic_service()
                 logger.info("MCP dynamique initialisé avec succès")
             except Exception as e:
                 logger.error(f"Erreur initialisation MCP dynamique: {e}")
@@ -337,7 +337,7 @@ class MCPRealEstateServer:
     async def _compare_locations(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Comparaison de localisations"""
         if self.mcp:
-            return await self.mcp.compare_locations(args['locations'], args.get('criteria', 'all'))
+            return await self.mcp.compare_locations_dynamic(args['locations'], args.get('criteria', 'all'))
         return {"error": "Service non disponible"}
     
     async def _get_property_summary(self, args: Dict[str, Any]) -> Dict[str, Any]:
@@ -349,7 +349,7 @@ class MCPRealEstateServer:
     async def _analyze_investment_opportunity(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Analyse d'opportunité d'investissement"""
         if self.mcp:
-            return await self.mcp.analyze_investment_opportunity(
+            return await self.mcp.analyze_investment_opportunity_dynamic(
                 location=args['location'],
                 investment_profile=args['investment_profile'],
                 min_price=args.get('min_price'),
@@ -362,7 +362,7 @@ class MCPRealEstateServer:
     async def _compare_investment_strategies(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Comparaison de stratégies d'investissement"""
         if self.mcp:
-            return await self.mcp.compare_investment_strategies(
+            return await self.mcp.compare_investment_strategies_dynamic(
                 location=args['location'],
                 property_data=args['property_data']
             )

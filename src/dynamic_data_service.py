@@ -45,33 +45,54 @@ class DynamicDataService:
     
     async def get_market_data(self, location: str, transaction_type: str = 'rent') -> Optional[MarketData]:
         """Récupère les données de marché pour une localisation"""
+        logger.info(f"Début de la récupération des données pour {location} (type: {transaction_type})")
         
+        if not location:
+            logger.error("Aucune localisation fournie")
+            return None
+            
         # Vérifier le cache
         cache_key = f"{location}_{transaction_type}"
         if self._is_cache_valid(cache_key):
+            logger.info(f"Données trouvées dans le cache pour {location}")
             return self.cache[cache_key]
         
         # Essayer plusieurs sources
         market_data = None
+        sources_tried = []
         
         try:
             # 1. Essayer DVF (Demandes de Valeurs Foncières) - données officielles
+            logger.info("Tentative avec DVF...")
             market_data = await self._get_dvf_data(location, transaction_type)
+            sources_tried.append("DVF")
             
             # 2. Fallback: Estimation basée sur données INSEE
             if not market_data:
+                logger.info("Échec DVF, tentative avec INSEE...")
                 market_data = await self._get_insee_estimation(location, transaction_type)
+                sources_tried.append("INSEE")
             
             # 3. Fallback: Estimation par proximité géographique
             if not market_data:
+                logger.info("Échec INSEE, tentative par proximité...")
                 market_data = await self._get_proximity_estimation(location, transaction_type)
+                sources_tried.append("Proximité")
+                
+            if not market_data:
+                logger.warning(f"Aucune donnée trouvée pour {location} après avoir essayé: {', '.join(sources_tried)}")
                 
         except Exception as e:
-            logger.error(f"Erreur récupération données {location}: {e}")
+            logger.error(f"Erreur lors de la récupération des données pour {location}", exc_info=True)
             
-        # Mettre en cache
+        # Mettre en cache même si c'est None pour éviter de surcharger les appels
+        logger.info(f"Mise en cache des données pour {location} (trouvé: {market_data is not None})")
+        self.cache[cache_key] = market_data
+        
         if market_data:
-            self.cache[cache_key] = market_data
+            logger.info(f"Données récupérées pour {location} depuis {market_data.source} (confiance: {market_data.confidence_score})")
+        else:
+            logger.warning(f"Aucune donnée disponible pour {location} après avoir essayé toutes les sources")
             
         return market_data
     
@@ -250,19 +271,39 @@ class DynamicDataService:
     async def _geocode_location(self, location: str) -> Optional[Dict[str, float]]:
         """Géocode une localisation"""
         try:
+            if not location:
+                logger.error("Aucune localisation fournie pour le géocodage")
+                return None
+                
             url = "https://api-adresse.data.gouv.fr/search/"
             params = {'q': location, 'limit': 1}
             
-            response = await self.client.get(url, params=params)
+            logger.info(f"Tentative de géocodage pour: {location}")
             
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('features'):
-                    coords = data['features'][0]['geometry']['coordinates']
-                    return {'lat': coords[1], 'lon': coords[0]}
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url, params=params)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    logger.debug(f"Réponse API géocodage: {data}")
                     
+                    if data.get('features') and len(data['features']) > 0:
+                        coords = data['features'][0]['geometry']['coordinates']
+                        result = {'lat': coords[1], 'lon': coords[0]}
+                        logger.info(f"Géocodage réussi pour {location}: {result}")
+                        return result
+                    else:
+                        logger.warning(f"Aucune donnée de géocodage pour: {location}")
+                else:
+                    logger.error(f"Échec du géocodage - Code HTTP {response.status_code} pour {location}")
+                    logger.error(f"Réponse: {response.text}")
+                    
+        except httpx.RequestError as e:
+            logger.error(f"Erreur de requête HTTP lors du géocodage de {location}: {str(e)}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Erreur de décodage JSON pour {location}: {str(e)}")
         except Exception as e:
-            logger.error(f"Erreur géocodage {location}: {e}")
+            logger.error(f"Erreur inattendue lors du géocodage de {location}: {str(e)}", exc_info=True)
             
         return None
     

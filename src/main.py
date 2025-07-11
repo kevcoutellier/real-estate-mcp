@@ -19,6 +19,7 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from urllib.parse import urlencode
 from playwright.async_api import async_playwright
+from .dynamic_data_service import DynamicDataService, get_dynamic_service
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -507,12 +508,186 @@ class LeBonCoinScraper:
 # Classe SeLogerScraper supprimée - ne générait que des données de test
 # Utiliser uniquement des sources de données réelles
 
+class SeLogerScraper:
+    """Scraper pour SeLoger avec gestion des erreurs"""
+    
+    def __init__(self):
+        self.base_url = "https://api-seloger.tools.svc.prod.di-test.io/api/v2/annonces"
+        self.search_url = "https://api-seloger.tools.svc.prod.di-test.io/api/v2/annonces/_search"
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+        
+        # Configuration SSL pour éviter les erreurs de certificat
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        self.client = httpx.AsyncClient(
+            headers=self.headers, 
+            timeout=30.0,
+            verify=False  # Désactive la vérification SSL pour les tests
+        )
+    
+    async def search(self, search_params: Dict[str, Any]) -> List[PropertyListing]:
+        """Recherche d'annonces sur SeLoger"""
+        listings = []
+        
+        try:
+            # Construction du payload pour l'API SeLoger
+            payload = self._build_payload(search_params)
+            logger.info(f"Recherche SeLoger: {search_params}")
+            
+            response = await self.client.post(self.search_url, json=payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                ads = data.get('items', [])
+                
+                for ad in ads:
+                    try:
+                        listing = self._parse_listing(ad)
+                        if listing:
+                            listings.append(listing)
+                    except Exception as e:
+                        logger.error(f"Erreur parsing annonce SeLoger: {e}")
+                        continue
+            
+            return listings
+            
+        except Exception as e:
+            logger.error(f"Erreur recherche SeLoger: {e}")
+            return []
+    
+    def _build_payload(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Construit le payload pour l'API SeLoger"""
+        payload = {
+            "pageIndex": 1,
+            "pageSize": 20,
+            "query": {
+                "criteria": []
+            },
+            "sortBy": "relevance",
+            "sortOrder": "desc"
+        }
+        
+        # Filtres de base
+        if params.get('location'):
+            payload["query"]["criteria"].append({
+                "type": "city",
+                "value": params['location']
+            })
+            
+        if params.get('min_price'):
+            payload["query"]["criteria"].append({
+                "type": "minPrice",
+                "value": params['min_price']
+            })
+            
+        if params.get('max_price'):
+            payload["query"]["criteria"].append({
+                "type": "maxPrice",
+                "value": params['max_price']
+            })
+            
+        if params.get('property_type'):
+            # Mapper les types de biens (à adapter selon la nomenclature SeLoger)
+            property_types = {
+                'appartement': 'apartment',
+                'maison': 'house',
+                'terrain': 'land'
+            }
+            
+            property_type = property_types.get(params['property_type'].lower(), 'apartment')
+            payload["query"]["criteria"].append({
+                "type": "realtyTypes",
+                "value": [property_type]
+            })
+            
+        if params.get('min_surface'):
+            payload["query"]["criteria"].append({
+                "type": "minSurface",
+                "value": params['min_surface']
+            })
+            
+        if params.get('max_surface'):
+            payload["query"]["criteria"].append({
+                "type": "maxSurface",
+                "value": params['max_surface']
+            })
+            
+        if params.get('rooms'):
+            payload["query"]["criteria"].append({
+                "type": "rooms",
+                "value": params['rooms']
+            })
+            
+        # Type de transaction (location/vente)
+        transaction_type = params.get('transaction_type', 'rent')
+        payload["query"]["criteria"].append({
+            "type": "transactionType",
+            "value": transaction_type
+        })
+        
+        return payload
+    
+    def _parse_listing(self, ad_data: Dict[str, Any]) -> Optional[PropertyListing]:
+        """Parse les données d'une annonce SeLoger"""
+        try:
+            # Extraction des données de base
+            property_id = str(ad_data.get('id', ''))
+            title = ad_data.get('title', 'Sans titre')
+            price = float(ad_data.get('price', 0))
+            
+            # Construction de l'URL de l'annonce
+            base_url = "https://www.seloger.com/annonces"
+            url = f"{base_url}/{property_id}.htm"
+            
+            # Extraction des images
+            images = []
+            if 'photos' in ad_data:
+                images = [photo.get('url', '') for photo in ad_data['photos'] if photo.get('url')]
+            
+            # Création de l'annonce
+            listing = PropertyListing(
+                id=f"seloger_{property_id}",
+                title=title,
+                price=price,
+                location=ad_data.get('city', {}).get('name', ''),
+                property_type=ad_data.get('propertyType', {}).get('label', ''),
+                surface_area=ad_data.get('surface', 0),
+                rooms=ad_data.get('rooms', 0),
+                bedrooms=ad_data.get('bedrooms', 0),
+                description=ad_data.get('description', ''),
+                images=images,
+                source='SeLoger',
+                url=url
+            )
+            
+            # Ajout des coordonnées si disponibles
+            if 'location' in ad_data and 'latitude' in ad_data['location'] and 'longitude' in ad_data['location']:
+                listing.coordinates = {
+                    'lat': ad_data['location']['latitude'],
+                    'lon': ad_data['location']['longitude']
+                }
+            
+            return listing
+            
+        except Exception as e:
+            logger.error(f"Erreur parsing annonce SeLoger: {e}")
+            return None
+
+
 class PropertyAggregator:
     """Agrégateur principal des annonces"""
     
     def __init__(self):
         self.scrapers = {
-            'leboncoin': LeBonCoinScraper()
+            'leboncoin': LeBonCoinScraper(),
+            'seloger': SeLogerScraper()
         }
         self.cache = {}  # Cache simple en mémoire
     
@@ -1473,16 +1648,15 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
         # Service de données dynamiques
         self.dynamic_service = None
         
-    def _ensure_dynamic_service(self):
+    async def _ensure_dynamic_service(self):
         """S'assure que le service dynamique est initialisé"""
         if self.dynamic_service is None:
             try:
-                self.dynamic_service = get_dynamic_service()
+                self.dynamic_service = await get_dynamic_service()
                 logger.info("Service dynamique initialisé avec succès")
             except Exception as e:
                 logger.error(f"Erreur lors de l'initialisation du service dynamique: {e}")
                 # Fallback : créer une instance directement
-                from dynamic_data_service import DynamicDataService
                 self.dynamic_service = DynamicDataService()
                 logger.info("Service dynamique initialisé en fallback")
     
@@ -1520,7 +1694,7 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
                                                    location: str,
                                                    min_price: Optional[float] = None,
                                                    max_price: Optional[float] = None,
-                                                   investment_profile: InvestmentProfile = InvestmentProfile.BOTH,
+                                                   investment_profile: str = "both",
                                                    **kwargs) -> Dict[str, Any]:
         """Analyse d'opportunité avec données dynamiques"""
         
@@ -1577,7 +1751,7 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
         
         return {
             'location': location,
-            'investment_profile': investment_profile.value,
+            'investment_profile': investment_profile,
             'market_data': market_data,
             'opportunities': opportunities,
             'summary': self._generate_dynamic_summary(location, opportunities, investment_profile, market_data)
@@ -1665,13 +1839,13 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
         }
     
     def _generate_recommendation(self, rental_analysis: Dict[str, Any], dealer_analysis: Dict[str, Any], 
-                               investment_profile: InvestmentProfile) -> str:
+                               investment_profile: str) -> str:
         """Génère une recommandation basée sur les analyses"""
         
         rental_score = rental_analysis.get('investment_score', 0)
         dealer_score = dealer_analysis.get('dealer_score', 0)
         
-        if investment_profile == InvestmentProfile.RENTAL_INVESTOR:
+        if investment_profile == "rental_investor":
             if rental_score >= 7:
                 return "Excellent pour investissement locatif"
             elif rental_score >= 5:
@@ -1679,7 +1853,7 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
             else:
                 return "Rendement locatif faible"
         
-        elif investment_profile == InvestmentProfile.PROPERTY_DEALER:
+        elif investment_profile == "property_dealer":
             if dealer_score >= 7:
                 return "Excellente opportunité marchand de biens"
             elif dealer_score >= 5:
@@ -1687,7 +1861,7 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
             else:
                 return "Marge insuffisante"
         
-        else:  # BOTH
+        else:  # "both"
             total_score = (rental_score + dealer_score) / 2
             if total_score >= 7:
                 return "Excellente opportunité mixte"
@@ -1697,7 +1871,7 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
                 return "Opportunité limitée"
     
     def _generate_dynamic_summary(self, location: str, opportunities: List[Dict[str, Any]], 
-                                investment_profile: InvestmentProfile, market_data: Dict[str, Any]) -> Dict[str, Any]:
+                                investment_profile: str, market_data: Dict[str, Any]) -> Dict[str, Any]:
         """Génère un résumé avec données dynamiques"""
         
         if not opportunities:
@@ -1719,6 +1893,136 @@ class DynamicRealEstateMCP(EnrichedRealEstateMCP):
             'data_freshness': market_data.get('last_updated', 'Inconnue'),
             'recommendation': f"Marché {location}: {market_data.get('market_trend', 'Données limitées')}"
         }
+    
+    async def compare_investment_strategies_dynamic(self, location: str, property_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Compare les stratégies d'investissement avec données dynamiques"""
+        try:
+            # Récupérer les données de marché
+            market_data = await self.get_market_data_dynamic(location)
+            
+            # Analyser le potentiel locatif
+            rental_analysis = await self._analyze_rental_potential_dynamic(property_data, market_data)
+            
+            # Analyser l'opportunité marchand de biens
+            dealer_analysis = await self._analyze_dealer_opportunity_dynamic(property_data, location)
+            
+            # Comparaison
+            comparison = {
+                'property_info': property_data,
+                'location': location,
+                'rental_strategy': rental_analysis,
+                'dealer_strategy': dealer_analysis,
+                'market_context': market_data,
+                'recommendation': self._generate_strategy_recommendation(rental_analysis, dealer_analysis)
+            }
+            
+            return comparison
+            
+        except Exception as e:
+            logger.error(f"Erreur compare_investment_strategies_dynamic: {e}")
+            return {
+                'error': f'Erreur lors de la comparaison: {str(e)}',
+                'location': location,
+                'property_data': property_data
+            }
+    
+    def _generate_strategy_recommendation(self, rental_analysis: Dict[str, Any], dealer_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """Génère une recommandation basée sur les deux analyses"""
+        rental_score = rental_analysis.get('investment_score', 0)
+        dealer_score = dealer_analysis.get('dealer_score', 0)
+        
+        if rental_score > dealer_score:
+            strategy = 'rental_investment'
+            reason = f'Meilleur rendement locatif (score: {rental_score:.1f} vs {dealer_score:.1f})'
+        elif dealer_score > rental_score:
+            strategy = 'property_dealing'
+            reason = f'Meilleure opportunité marchand de biens (score: {dealer_score:.1f} vs {rental_score:.1f})'
+        else:
+            strategy = 'both_viable'
+            reason = 'Les deux stratégies sont équivalentes'
+        
+        return {
+            'recommended_strategy': strategy,
+            'reason': reason,
+            'rental_score': rental_score,
+            'dealer_score': dealer_score,
+            'confidence': 'high' if abs(rental_score - dealer_score) > 1 else 'medium'
+        }
+    
+    async def compare_locations_dynamic(self, locations: List[str], criteria: str = 'all') -> Dict[str, Any]:
+        """Compare plusieurs localisations avec données dynamiques"""
+        try:
+            comparisons = []
+            
+            for location in locations:
+                market_data = await self.get_market_data_dynamic(location)
+                
+                location_info = {
+                    'location': location,
+                    'market_data': market_data,
+                    'score': self._calculate_location_score(market_data, criteria)
+                }
+                comparisons.append(location_info)
+            
+            # Trier par score
+            comparisons.sort(key=lambda x: x['score'], reverse=True)
+            
+            return {
+                'comparison_criteria': criteria,
+                'locations_compared': len(locations),
+                'rankings': comparisons,
+                'best_location': comparisons[0]['location'] if comparisons else None,
+                'summary': self._generate_comparison_summary(comparisons, criteria)
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur compare_locations_dynamic: {e}")
+            return {
+                'error': f'Erreur lors de la comparaison: {str(e)}',
+                'locations': locations
+            }
+    
+    def _calculate_location_score(self, market_data: Dict[str, Any], criteria: str) -> float:
+        """Calcule un score pour une localisation selon les critères"""
+        if market_data.get('error'):
+            return 0.0
+        
+        score = 0.0
+        
+        if criteria in ['price', 'all']:
+            # Score basé sur le prix (plus bas = meilleur)
+            avg_price = market_data.get('avg_sale_sqm', 5000)
+            price_score = max(0, (10000 - avg_price) / 10000 * 10)
+            score += price_score
+        
+        if criteria in ['availability', 'all']:
+            # Score basé sur la disponibilité (simulé)
+            availability_score = market_data.get('confidence_score', 0.5) * 10
+            score += availability_score
+        
+        if criteria in ['quality', 'all']:
+            # Score basé sur la qualité du marché
+            trend = market_data.get('market_trend', 'stable')
+            if trend == 'growing':
+                score += 8
+            elif trend == 'stable':
+                score += 6
+            else:
+                score += 3
+        
+        return round(score, 2)
+    
+    def _generate_comparison_summary(self, comparisons: List[Dict[str, Any]], criteria: str) -> str:
+        """Génère un résumé de la comparaison"""
+        if not comparisons:
+            return "Aucune donnée disponible pour la comparaison"
+        
+        best = comparisons[0]
+        worst = comparisons[-1]
+        
+        return f"Meilleure localisation: {best['location']} (score: {best['score']:.1f}). " \
+               f"Moins favorable: {worst['location']} (score: {worst['score']:.1f}). " \
+               f"Critère principal: {criteria}."
 
 # Mise à jour des outils MCP pour utiliser la version dynamique
 MCP_TOOLS_DYNAMIC = [

@@ -20,21 +20,34 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 sys.path.insert(0, os.path.join(current_dir, 'src'))
 
+# Créer un répertoire logs s'il n'existe pas
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, 'mcp_server.log')
+
 # Configuration du logging compatible Windows avec encodage UTF-8
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,  # Niveau de log détaillé
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         # Fichier de log avec encodage UTF-8 explicite
-        logging.FileHandler('mcp_server.log', encoding='utf-8'),
-        # Pas de StreamHandler pour éviter les conflits avec stdout/stdin MCP
+        logging.FileHandler(log_file, encoding='utf-8'),
+        # Ajout d'un StreamHandler pour voir les logs dans la console
+        logging.StreamHandler()
     ]
 )
-logger = logging.getLogger(__name__)
+
+# Désactiver les logs trop verbeux de certaines bibliothèques
+logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger('httpcore').setLevel(logging.WARNING)
+
+# Logger principal
+logger = logging.getLogger('real_estate_mcp')
+logger.info(f'Logs enregistrés dans: {log_file}')
 
 # Import de la version dynamique sans données hardcodées
 try:
-    from main import DynamicRealEstateMCP
+    from src.main import DynamicRealEstateMCP
     logger.info("Module dynamique importe avec succes - donnees temps reel")
     HAS_MAIN_MODULE = True
 except ImportError as e:
@@ -235,6 +248,18 @@ class MCPRealEstateServer:
         self.request_counter = 0
         
         logger.info(f"Serveur MCP Immobilier initialise avec {len(self.tools)} outils")
+    
+    async def initialize_dynamic_service(self):
+        """Initialise le service dynamique de manière asynchrone"""
+        if self.mcp:
+            try:
+                await self.mcp._ensure_dynamic_service()
+                logger.info("Service dynamique initialise avec succes")
+                return True
+            except Exception as e:
+                logger.error(f"Erreur initialisation service dynamique: {e}")
+                return False
+        return False
 
     async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -397,18 +422,22 @@ class MCPRealEstateServer:
         }
 
     async def _get_property_summary(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Genere un resume du marche immobilier pour une zone"""
+        """Genere un resume du marche immobilier pour une zone avec donnees dynamiques"""
         logger.info(f"Resume de marche pour: {args}")
         
         if self.mcp:
             try:
-                summary = await self.mcp.get_property_summary(args['location'])
+                # Utiliser les données de marché dynamiques
+                market_data = await self.mcp.get_market_data_dynamic(
+                    location=args['location'],
+                    transaction_type='rent'  # Par défaut location
+                )
                 
-                if 'error' not in summary:
+                if 'error' not in market_data:
                     return {
                         "success": True,
                         "tool": "get_property_summary",
-                        "analysis": summary
+                        "analysis": market_data
                     }
             except Exception as e:
                 logger.error(f"Erreur resume reelle: {e}")
@@ -420,19 +449,23 @@ class MCPRealEstateServer:
         }
 
     async def _analyze_market(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyse du marche immobilier avec donnees enrichies"""
+        """Analyse du marche immobilier avec donnees dynamiques enrichies"""
         logger.info(f"Analyse de marche pour: {args}")
         
         if self.mcp:
             try:
-                summary = await self.mcp.get_property_summary(args['location'])
+                # Utiliser les données de marché dynamiques
+                market_data = await self.mcp.get_market_data_dynamic(
+                    location=args['location'],
+                    transaction_type=args.get('transaction_type', 'rent')
+                )
                 
-                if 'error' not in summary:
+                if 'error' not in market_data:
                     return {
                         "success": True,
                         "tool": "analyze_market",
-                        "analysis": summary,
-                        "insights": self._generate_market_insights(summary)
+                        "analysis": market_data,
+                        "insights": self._generate_market_insights(market_data)
                     }
             except Exception as e:
                 logger.error(f"Erreur analyse reelle: {e}")
@@ -454,6 +487,22 @@ class MCPRealEstateServer:
                 "error": "Il faut au moins 2 localisations pour effectuer une comparaison"
             }
         
+        if self.mcp:
+            try:
+                comparison = await self.mcp.compare_locations_dynamic(
+                    locations=locations,
+                    criteria=args.get('criteria', 'all')
+                )
+                
+                if 'error' not in comparison:
+                    return {
+                        "success": True,
+                        "tool": "compare_locations",
+                        "comparison": comparison
+                    }
+            except Exception as e:
+                logger.error(f"Erreur comparaison localisations: {e}")
+        
         return {
             "success": False,
             "error": "Aucune donnee reelle disponible - Service dynamique requis",
@@ -461,17 +510,34 @@ class MCPRealEstateServer:
         }
 
     async def _get_neighborhood_info(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Informations detaillees sur un quartier"""
+        """Informations detaillees sur un quartier avec donnees dynamiques"""
         logger.info(f"Analyse de quartier: {args}")
         
-        if self.mcp and hasattr(self.mcp, 'get_neighborhood_analysis'):
+        if self.mcp:
             try:
-                analysis = await self.mcp.get_neighborhood_analysis(args['location'])
-                return {
-                    "success": True,
-                    "tool": "get_neighborhood_info",
-                    "analysis": analysis
-                }
+                # Utiliser le service de géocodage pour obtenir les informations du quartier
+                if hasattr(self.mcp, 'aggregator') and hasattr(self.mcp.aggregator, 'geocoding_service'):
+                    # D'abord géocoder l'adresse
+                    coords = await self.mcp.aggregator.geocoding_service.geocode_address(args['location'])
+                    if coords:
+                        # Puis obtenir les informations du quartier
+                        neighborhood_info = await self.mcp.aggregator.geocoding_service.get_neighborhood_info(coords)
+                        return {
+                            "success": True,
+                            "tool": "get_neighborhood_info",
+                            "analysis": neighborhood_info
+                        }
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Impossible de localiser: {args['location']}"
+                        }
+                else:
+                    # Fallback si le service de géocodage n'est pas disponible
+                    return {
+                        "success": False,
+                        "error": "Service de géocodage non disponible"
+                    }
             except Exception as e:
                 logger.error(f"Erreur analyse quartier: {e}")
         
@@ -487,7 +553,7 @@ class MCPRealEstateServer:
         
         if self.mcp:
             try:
-                analysis = await self.mcp.analyze_investment_opportunity(
+                analysis = await self.mcp.analyze_investment_opportunity_dynamic(
                     location=args['location'],
                     min_price=args.get('min_price'),
                     max_price=args.get('max_price'),
@@ -517,7 +583,7 @@ class MCPRealEstateServer:
         
         if self.mcp:
             try:
-                comparison = await self.mcp.compare_investment_strategies(
+                comparison = await self.mcp.compare_investment_strategies_dynamic(
                     location=args['location'],
                     property_data=args['property_data']
                 )
@@ -873,6 +939,9 @@ async def main():
     
     # Initialisation du serveur
     server = MCPRealEstateServer()
+    
+    # Initialisation du service dynamique
+    await server.initialize_dynamic_service()
     
     try:
         # Boucle principale de traitement des requetes
