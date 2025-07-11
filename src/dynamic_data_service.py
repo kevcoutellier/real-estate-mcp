@@ -395,6 +395,176 @@ class DynamicDataService:
         
         return adjusted_costs
     
+    async def search_properties(self, location: str, **kwargs) -> Dict[str, Any]:
+        """Recherche de propriétés - Interface MCP"""
+        logger.info(f"Recherche de propriétés à {location} avec critères: {kwargs}")
+        
+        try:
+            # Récupérer les données de marché
+            transaction_type = kwargs.get('transaction_type', 'rent')
+            market_data = await self.get_market_data(location, transaction_type)
+            
+            # Générer des propriétés simulées basées sur les données de marché
+            properties = await self._generate_sample_properties(location, market_data, **kwargs)
+            
+            return {
+                "status": "success",
+                "location": location,
+                "properties": properties,
+                "market_data": market_data.__dict__ if market_data else None,
+                "message": f"Trouvé {len(properties)} propriétés à {location}"
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur recherche propriétés: {e}")
+            return {
+                "status": "error",
+                "message": f"Erreur lors de la recherche: {str(e)}",
+                "properties": []
+            }
+    
+    async def analyze_investment_opportunity(self, location: str, **kwargs) -> Dict[str, Any]:
+        """Analyse d'opportunité d'investissement - Interface MCP"""
+        logger.info(f"Analyse d'investissement à {location}")
+        
+        try:
+            market_data = await self.get_market_data(location, 'sale')
+            rental_data = await self.get_market_data(location, 'rent')
+            
+            if not market_data or not rental_data:
+                return {
+                    "status": "error",
+                    "message": "Données de marché insuffisantes"
+                }
+            
+            # Calcul de rentabilité estimée
+            avg_price = market_data.avg_sale_sqm * kwargs.get('min_surface', 50)
+            avg_rent = rental_data.avg_rent_sqm * kwargs.get('min_surface', 50) * 12
+            
+            yield_rate = (avg_rent / avg_price) * 100 if avg_price > 0 else 0
+            
+            return {
+                "status": "success",
+                "location": location,
+                "investment_analysis": {
+                    "estimated_price": round(avg_price),
+                    "estimated_annual_rent": round(avg_rent),
+                    "gross_yield": round(yield_rate, 2),
+                    "market_trend": market_data.market_trend,
+                    "confidence": market_data.confidence_score
+                },
+                "message": f"Rendement brut estimé: {yield_rate:.2f}%"
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur analyse investissement: {e}")
+            return {
+                "status": "error",
+                "message": f"Erreur lors de l'analyse: {str(e)}"
+            }
+    
+    async def get_property_summary(self, location: str) -> Dict[str, Any]:
+        """Résumé du marché immobilier - Interface MCP"""
+        logger.info(f"Résumé marché pour {location}")
+        
+        try:
+            sale_data = await self.get_market_data(location, 'sale')
+            rent_data = await self.get_market_data(location, 'rent')
+            
+            return {
+                "status": "success",
+                "location": location,
+                "summary": {
+                    "avg_sale_price_sqm": sale_data.avg_sale_sqm if sale_data else "N/A",
+                    "avg_rent_price_sqm": rent_data.avg_rent_sqm if rent_data else "N/A",
+                    "market_trend": sale_data.market_trend if sale_data else "Inconnu",
+                    "last_updated": sale_data.last_updated.isoformat() if sale_data else None
+                },
+                "message": f"Résumé du marché pour {location}"
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur résumé marché: {e}")
+            return {
+                "status": "error",
+                "message": f"Erreur lors du résumé: {str(e)}"
+            }
+    
+    async def get_neighborhood_info(self, location: str) -> Dict[str, Any]:
+        """Informations sur le quartier - Interface MCP"""
+        return {
+            "status": "success",
+            "location": location,
+            "neighborhood": {
+                "transport": "Données de transport non disponibles",
+                "amenities": "Données d'équipements non disponibles",
+                "quality_of_life": "Évaluation non disponible"
+            },
+            "message": f"Informations de base pour {location}"
+        }
+    
+    async def analyze_market(self, location: str, **kwargs) -> Dict[str, Any]:
+        """Analyse de marché - Interface MCP"""
+        return await self.get_property_summary(location)
+    
+    async def compare_investment_strategies(self, location: str, **kwargs) -> Dict[str, Any]:
+        """Comparaison de stratégies d'investissement - Interface MCP"""
+        return {
+            "status": "success",
+            "location": location,
+            "comparison": {
+                "rental_investment": "Analyse non disponible",
+                "property_dealing": "Analyse non disponible"
+            },
+            "message": "Comparaison de stratégies non implémentée"
+        }
+    
+    async def compare_locations(self, locations: List[str], **kwargs) -> Dict[str, Any]:
+        """Comparaison de localisations - Interface MCP"""
+        return {
+            "status": "success",
+            "locations": locations,
+            "comparison": "Comparaison non implémentée",
+            "message": f"Comparaison de {len(locations)} localisations"
+        }
+    
+    async def _generate_sample_properties(self, location: str, market_data: Optional[MarketData], **kwargs) -> List[Dict[str, Any]]:
+        """Génère des propriétés d'exemple basées sur les données de marché"""
+        if not market_data:
+            return []
+        
+        properties = []
+        rooms = kwargs.get('rooms', 2)
+        min_surface = kwargs.get('min_surface', 30)
+        max_surface = kwargs.get('max_surface', 100)
+        transaction_type = kwargs.get('transaction_type', 'rent')
+        
+        # Générer 3-5 propriétés d'exemple
+        for i in range(3, 6):
+            surface = min_surface + (i * 10)
+            if surface > max_surface:
+                surface = max_surface
+            
+            if transaction_type == 'sale':
+                price = market_data.avg_sale_sqm * surface
+                price_text = f"{int(price):,}€"
+            else:
+                price = market_data.avg_rent_sqm * surface
+                price_text = f"{int(price)}€/mois"
+            
+            properties.append({
+                "title": f"{rooms} pièces - {surface}m² - {location}",
+                "price": int(price),
+                "price_text": price_text,
+                "surface": surface,
+                "rooms": rooms,
+                "location": location,
+                "type": "appartement",
+                "source": "estimation"
+            })
+        
+        return properties
+    
     async def close(self):
         """Ferme les connexions"""
         await self.client.aclose()

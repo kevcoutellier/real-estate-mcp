@@ -7,10 +7,16 @@ import logging
 from typing import Dict, List, Optional, Any
 from dataclasses import asdict
 from datetime import datetime
-from .base_mcp import RealEstateMCP
-from ..models.property import PropertyListing
-from ..models.investment import InvestmentProfile, RentalAnalysis, DealerAnalysis
-from ..aggregators.property_aggregator import EnrichedPropertyAggregator
+try:
+    from .base_mcp import RealEstateMCP
+    from ..models.property import PropertyListing
+    from ..models.investment import InvestmentProfile, RentalAnalysis, DealerAnalysis
+    from ..aggregators.property_aggregator import EnrichedPropertyAggregator
+except ImportError:
+    from base_mcp import RealEstateMCP
+    from models.property import PropertyListing
+    from models.investment import InvestmentProfile, RentalAnalysis, DealerAnalysis
+    from aggregators.property_aggregator import EnrichedPropertyAggregator
 
 logger = logging.getLogger(__name__)
 

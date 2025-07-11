@@ -5,8 +5,12 @@ MCP avec données dynamiques en temps réel
 
 import logging
 from typing import Dict, List, Optional, Any
-from .enriched_mcp import EnrichedRealEstateMCP
-from ..dynamic_data_service import DynamicDataService, get_dynamic_service
+try:
+    from .enriched_mcp import EnrichedRealEstateMCP
+    from ..dynamic_data_service import DynamicDataService, get_dynamic_service
+except ImportError:
+    from enriched_mcp import EnrichedRealEstateMCP
+    from dynamic_data_service import DynamicDataService, get_dynamic_service
 
 logger = logging.getLogger(__name__)
 

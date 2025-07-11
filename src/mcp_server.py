@@ -19,12 +19,18 @@ sys.path.insert(0, current_dir)
 sys.path.insert(0, project_root)
 
 # Configuration du logging
-from .utils.logger import setup_logger
+try:
+    from .utils.logger import setup_logger
+except ImportError:
+    from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 # Import des modules MCP
 try:
-    from main import DynamicRealEstateMCP
+    try:
+        from .main import DynamicRealEstateMCP
+    except ImportError:
+        from main import DynamicRealEstateMCP
     logger.info("Module dynamique importé avec succès - données temps réel")
     HAS_MAIN_MODULE = True
 except ImportError as e:

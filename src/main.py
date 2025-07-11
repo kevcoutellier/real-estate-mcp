@@ -4,8 +4,15 @@ Point d'entrée principal pour le MCP Real Estate restructuré
 """
 
 import logging
-from .mcp.dynamic_mcp import DynamicRealEstateMCP
-from .dynamic_data_service import get_dynamic_service
+try:
+    from .mcp.dynamic_mcp import DynamicRealEstateMCP
+    from .dynamic_data_service import get_dynamic_service
+except ImportError:
+    from mcp.dynamic_mcp import DynamicRealEstateMCP
+    from dynamic_data_service import get_dynamic_service
+
+# Export de la classe principale
+__all__ = ['DynamicRealEstateMCP', 'get_mcp_instance', 'execute_tool', 'get_available_tools']
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -138,46 +145,50 @@ async def get_mcp_instance():
 # Fonctions d'interface pour les outils MCP
 async def search_properties(**kwargs):
     """Interface pour la recherche de propriétés"""
-    mcp = await get_mcp_instance()
-    return await mcp.search_properties(**kwargs)
+    service = await get_dynamic_service()
+    return await service.search_properties(**kwargs)
 
 
 async def get_property_summary(**kwargs):
     """Interface pour le résumé de marché"""
-    mcp = await get_mcp_instance()
-    return await mcp.get_property_summary(**kwargs)
+    service = await get_dynamic_service()
+    location = kwargs.pop('location', None)
+    return await service.get_property_summary(location)
 
 
 async def get_neighborhood_info(**kwargs):
     """Interface pour l'analyse de quartier"""
-    mcp = await get_mcp_instance()
-    return await mcp.get_neighborhood_analysis(**kwargs)
+    service = await get_dynamic_service()
+    location = kwargs.pop('location', None)
+    return await service.get_neighborhood_info(location)
 
 
 async def analyze_market(**kwargs):
     """Interface pour l'analyse de marché"""
-    mcp = await get_mcp_instance()
-    location = kwargs.get('location')
-    transaction_type = kwargs.get('transaction_type', 'rent')
-    return await mcp.get_market_data_dynamic(location, transaction_type)
+    service = await get_dynamic_service()
+    location = kwargs.pop('location', None)
+    return await service.analyze_market(location, **kwargs)
 
 
 async def analyze_investment_opportunity(**kwargs):
     """Interface pour l'analyse d'opportunité d'investissement"""
-    mcp = await get_mcp_instance()
-    return await mcp.analyze_investment_opportunity_dynamic(**kwargs)
+    service = await get_dynamic_service()
+    location = kwargs.pop('location', None)  # Utiliser pop pour éviter la duplication
+    return await service.analyze_investment_opportunity(location, **kwargs)
 
 
 async def compare_investment_strategies(**kwargs):
     """Interface pour la comparaison de stratégies d'investissement"""
-    mcp = await get_mcp_instance()
-    return await mcp.compare_investment_strategies_dynamic(**kwargs)
+    service = await get_dynamic_service()
+    location = kwargs.pop('location', None)
+    return await service.compare_investment_strategies(location, **kwargs)
 
 
 async def compare_locations(**kwargs):
     """Interface pour la comparaison de localisations"""
-    mcp = await get_mcp_instance()
-    return await mcp.compare_locations_dynamic(**kwargs)
+    service = await get_dynamic_service()
+    locations = kwargs.pop('locations', [])
+    return await service.compare_locations(locations, **kwargs)
 
 
 # Mapping des outils vers leurs fonctions

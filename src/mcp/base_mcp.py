@@ -7,8 +7,12 @@ import logging
 from typing import Dict, List, Optional, Any
 from dataclasses import asdict
 from datetime import datetime
-from ..models.property import PropertyListing
-from ..aggregators.property_aggregator import PropertyAggregator
+try:
+    from ..models.property import PropertyListing
+    from ..aggregators.property_aggregator import PropertyAggregator
+except ImportError:
+    from models.property import PropertyListing
+    from aggregators.property_aggregator import PropertyAggregator
 
 logger = logging.getLogger(__name__)
 
