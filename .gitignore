@@ -70,9 +70,11 @@ logs/
 
 # Cache
 cache/
+
 # Organisation patterns
 logs/*.log
 Thumbs.db
+
 # IDE files
 # Cache directories
 .coverage
@@ -80,3 +82,10 @@ htmlcov/
 # Temporary files
 tmp/
 *.temp
+
+# Migration and backup files
+*_backup_*.py
+migrate_*.py
+finalize_*.py
+MIGRATION_*.md
+backup_*/

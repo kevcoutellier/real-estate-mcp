@@ -19,7 +19,7 @@ sys.path.insert(0, current_dir)
 sys.path.insert(0, project_root)
 
 # Configuration du logging
-from utils.logger import setup_logger
+from .utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 # Import des modules MCP
